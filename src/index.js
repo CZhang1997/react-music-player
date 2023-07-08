@@ -9,7 +9,7 @@ import cls from 'classnames'
 import download from 'downloadjs'
 import getIsMobile from 'is-mobile'
 import Slider from 'rc-slider/lib/Slider'
-import Switch from 'rc-switch'
+// import Switch from 'rc-switch'
 import React, { cloneElement, createRef, PureComponent } from 'react'
 import { createPortal } from 'react-dom'
 import Draggable from 'react-draggable'
@@ -371,14 +371,14 @@ export default class ReactJkMusicPlayer extends PureComponent {
 
     const ThemeSwitchComponent = showThemeSwitch && (
       <span className="group theme-switch">
-        <Switch
+        {/* <Switch
           className="theme-switch-container"
           onChange={this.themeChange}
           checkedChildren={locale.lightThemeText}
           unCheckedChildren={locale.darkThemeText}
           checked={theme === THEME.LIGHT}
           title={locale.switchThemeText}
-        />
+        /> */}
       </span>
     )
 
