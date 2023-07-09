@@ -4,15 +4,11 @@ import { PLAYER_KEY } from '../config/player'
 import SORTABLE_CONFIG from '../config/sortable'
 
 class AudioListsPanel extends React.Component {
-  componentDidMount() {
-    this.scrollIntoView()
-  }
-
   componentDidUpdate(prevProps) {
     if (
-      prevProps.playId !== this.props.playId ||
-      prevProps.visible !== this.props.visible ||
-      prevProps.isMobile !== this.props.isMobile
+      prevProps.playId !== this.props.playId &&
+      prevProps.visible &&
+      this.props.visible
     ) {
       this.scrollIntoView()
     }
@@ -21,18 +17,17 @@ class AudioListsPanel extends React.Component {
   scrollIntoView() {
     const { playId, visible, isMobile } = this.props
     const { children = [] } = this.ref || {}
-
-    if (isMobile && visible) {
+    if (!isMobile && visible) {
       for (let i = 0; i < children.length; i++) {
         const item = children[i]
         if (item.id === playId) {
-          item.scrollIntoView({ behavior: 'smooth' })
+          item.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center',
+          })
           break
         }
-        // if (item.className.includes('playing')) {
-        //   item.scrollIntoView({ behavior: 'smooth' })
-        //   break
-        // }
       }
     }
   }
@@ -62,25 +57,43 @@ class AudioListsPanel extends React.Component {
           'glass-bg': glassBg,
         })}
       >
-        <div className="audio-lists-panel-header">
+        <div
+          className="audio-lists-panel-header"
+          ref={(ref) => {
+            this.headerRef = ref
+            return 1
+          }}
+        >
           <h2 className="audio-lists-panel-header-title">
             <span>{locale.playListsText} / </span>
             <span className="audio-lists-panel-header-num">
               {audioLists.length}
             </span>
             <span className="audio-lists-panel-header-actions">
-              {remove && (
+              {/* {remove && (
                 <>
                   <span
                     className="audio-lists-panel-header-delete-btn"
                     title={locale.removeAudioListsText}
                     onClick={() => onDelete()}
                   >
-                    {icon.delete}
+                    {icon.play}
                   </span>
                   <span className="audio-lists-panel-header-line" />
                 </>
-              )}
+              )} */}
+              {
+                <>
+                  <span
+                    className="audio-lists-panel-header-locate-btn"
+                    title="Locate the playing song"
+                    onClick={() => this.scrollIntoView()}
+                  >
+                    {icon.play}
+                  </span>
+                  <span className="audio-lists-panel-header-line" />
+                </>
+              }
               <span
                 className="audio-lists-panel-header-close-btn"
                 title={locale.closeText}
