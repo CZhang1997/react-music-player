@@ -819,7 +819,7 @@ export default class ReactJkMusicPlayer extends PureComponent {
    * 通用方法
    * @description: ignore 如果 为 true playId相同则不暂停 适用于 随机播放,重新播放等逻辑
    */
-  audioListsPlay = (playId, ignore = false, state = this.state) => {
+  audioListsPlay = async (playId, ignore = false, state = this.state) => {
     const {
       playId: currentPlayId,
       playing,
@@ -839,9 +839,14 @@ export default class ReactJkMusicPlayer extends PureComponent {
     const playIndex = audioLists.findIndex(
       (audio) => audio[PLAYER_KEY] === playId,
     )
-    const { name, cover, musicSrc, singer, lyric = '' } =
-      audioLists[playIndex] || {}
+    const { name, cover, singer, lyric = '', id } = audioLists[playIndex] || {}
 
+    let { musicSrc } = audioLists[playIndex] || {}
+    if (!musicSrc) {
+      musicSrc = await this.props.getAudioSrcById(id, audioLists[playIndex])
+      audioLists[playIndex] = { ...audioLists[playIndex], musicSrc }
+      this.setState(audioLists)
+    }
     const loadAudio = (originMusicSrc) => {
       this.setState(
         {
@@ -869,6 +874,7 @@ export default class ReactJkMusicPlayer extends PureComponent {
         },
       )
     }
+
     // 如果点击当前项 就暂停 或者播放
     if (playId === currentPlayId && !ignore) {
       this.setState({ playing: !playing })
@@ -1559,10 +1565,12 @@ export default class ReactJkMusicPlayer extends PureComponent {
     }
 
     this.audioPrevAndNextBasePlayHandle(false)
+    this.updateMediaSessionMetadata()
   }
 
   onPlayNextAudio = () => {
     this.audioPrevAndNextBasePlayHandle(true)
+    this.updateMediaSessionMetadata()
   }
 
   audioTimeUpdate = () => {
@@ -2239,7 +2247,7 @@ export default class ReactJkMusicPlayer extends PureComponent {
 
   onAddMediaSession = () => {
     if ('mediaSession' in navigator && this.props.showMediaSession) {
-      const defaultSkipTime = 10
+      const defaultSkipTime = 30
       navigator.mediaSession.setActionHandler('play', this.onTogglePlay)
       navigator.mediaSession.setActionHandler('pause', this.onTogglePlay)
       navigator.mediaSession.setActionHandler('seekbackward', (details) => {
@@ -2389,6 +2397,20 @@ export default class ReactJkMusicPlayer extends PureComponent {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ isResetCoverRotate: true })
     }
+    const { playIndex, audioLists, musicSrc } = this.state
+    if (!musicSrc && audioLists.length > 0) {
+      const { id } = audioLists[playIndex] || {}
+      this.updateAudioSrcById(id)
+    }
+  }
+
+  async updateAudioSrcById(id) {
+    if (this.props.getAudioSrcById) {
+      const musicSrc = await this.props.getAudioSrcById(id, this.state)
+      this.setState({
+        musicSrc,
+      })
+    }
   }
 
   // eslint-disable-next-line camelcase
@@ -2451,6 +2473,7 @@ export default class ReactJkMusicPlayer extends PureComponent {
   }
 
   componentWillUnmount() {
+    // clearInterval(this.updateInterval)
     this.unInstallPlayer()
   }
 
@@ -2460,5 +2483,8 @@ export default class ReactJkMusicPlayer extends PureComponent {
     this.initPlayer()
     this.initSortableAudioLists()
     this.onGetAudioInstance()
+    // this.updateInterval = setInterval(() => {
+    //   this.onAddMediaSession()
+    // }, 1000)
   }
 }
