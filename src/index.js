@@ -841,8 +841,20 @@ export default class ReactJkMusicPlayer extends PureComponent {
     )
     const { name, cover, singer, lyric = '', id } = audioLists[playIndex] || {}
 
-    let { musicSrc } = audioLists[playIndex] || {}
-    if (!musicSrc) {
+    let { musicSrc = '' } = audioLists[playIndex] || {}
+    let expired = false
+    // check if src expired
+    const expiredItem = musicSrc
+      .split('&')
+      .find((item) => item.includes('Expires'))
+    if (expiredItem) {
+      const epochtime = expiredItem.match(/\d+/)[0]
+      if (epochtime) {
+        expired = Number(`${epochtime}000`) - new Date().getTime() < 100000
+      }
+    }
+
+    if (!musicSrc || expired) {
       musicSrc = await this.props.getAudioSrcById(id, audioLists[playIndex])
       audioLists[playIndex] = { ...audioLists[playIndex], musicSrc }
       this.setState(audioLists)
