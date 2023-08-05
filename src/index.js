@@ -2048,9 +2048,8 @@ export default class ReactJkMusicPlayer extends PureComponent {
       ...this.state.audioLists,
       ...audioLists.filter(
         (audio) =>
-          this.state.audioLists.findIndex(
-            (v) => v.musicSrc === audio.musicSrc,
-          ) === -1,
+          this.state.audioLists.findIndex((v) => v.title === audio.title) ===
+          -1,
       ),
     ]
     this.initPlayInfo(newAudioLists)
