@@ -2399,15 +2399,21 @@ export default class ReactJkMusicPlayer extends PureComponent {
     const { playIndex, audioLists, musicSrc } = this.state
     if (!musicSrc && audioLists.length > 0) {
       const { id } = audioLists[playIndex] || {}
-      this.updateAudioSrcById(id, audioLists[playIndex])
+      this.updateAudioSrcById(id)
     }
   }
 
-  async updateAudioSrcById(id, obj) {
+  async updateAudioSrcById(id) {
+    const { playIndex, audioLists } = this.state
     if (this.props.getAudioSrcById) {
-      const musicSrc = await this.props.getAudioSrcById(id, obj)
+      const musicSrc = await this.props.getAudioSrcById(
+        id,
+        audioLists[playIndex],
+      )
+      audioLists[playIndex] = { ...audioLists[playIndex], musicSrc }
       this.setState({
         musicSrc,
+        audioLists,
       })
     }
   }
