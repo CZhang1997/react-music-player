@@ -1248,6 +1248,16 @@ export default class ReactJkMusicPlayer extends PureComponent {
   }
 
   onTogglePlay = () => {
+    const { playIndex, audioLists, musicSrc } = this.state
+    if (
+      !musicSrc &&
+      audioLists.length > 0 &&
+      playIndex < audioLists.length &&
+      audioLists[playIndex].musicSrc === undefined
+    ) {
+      const { id } = audioLists[playIndex] || {}
+      this.updateAudioSrcById(id)
+    }
     this.setState({ isAudioSeeking: false })
     if (this.state.audioLists.length >= 1) {
       const { fadeIn, fadeOut } = this.props.volumeFade || {}
@@ -1398,6 +1408,9 @@ export default class ReactJkMusicPlayer extends PureComponent {
     const { networkState, readyState } = this.audio
 
     if (!musicSrc) {
+      // const { id } = audioLists[playIndex] || {}
+      // this.updateAudioSrcById(id)
+      // console.log('loadAndPlayAudio get audio')
       return
     }
 
@@ -2145,8 +2158,19 @@ export default class ReactJkMusicPlayer extends PureComponent {
     })
   }
 
-  updatePlayIndex = (playIndex) => {
+  updatePlayIndex = (playIndex, fromPlayByIndex) => {
     const currentPlayIndex = this.getCurrentPlayIndex()
+    const { audioLists, musicSrc } = this.state
+    if (
+      fromPlayByIndex &&
+      !musicSrc &&
+      audioLists.length > 0 &&
+      currentPlayIndex < audioLists.length &&
+      audioLists[currentPlayIndex].musicSrc === undefined
+    ) {
+      const { id } = audioLists[currentPlayIndex] || {}
+      this.updateAudioSrcById(id)
+    }
     if (playIndex !== undefined && currentPlayIndex !== playIndex) {
       this.resetAudioPlayStatus().then(() => {
         const currentPlayAudio = this.state.audioLists[
@@ -2160,7 +2184,7 @@ export default class ReactJkMusicPlayer extends PureComponent {
   }
 
   playByIndex = (index) => {
-    this.updatePlayIndex(index)
+    this.updatePlayIndex(index, true)
   }
 
   getEnhanceAudio = () => {
@@ -2408,11 +2432,16 @@ export default class ReactJkMusicPlayer extends PureComponent {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ isResetCoverRotate: true })
     }
-    const { playIndex, audioLists, musicSrc } = this.state
-    if (!musicSrc && audioLists.length > 0) {
-      const { id } = audioLists[playIndex] || {}
-      this.updateAudioSrcById(id)
-    }
+    // const { playIndex, audioLists, musicSrc } = this.state
+    // if (
+    //   !musicSrc &&
+    //   audioLists.length > 0 &&
+    //   playIndex < audioLists.length &&
+    //   audioLists[playIndex].musicSrc === undefined
+    // ) {
+    //   const { id } = audioLists[playIndex] || {}
+    //   this.updateAudioSrcById(id)
+    // }
   }
 
   async updateAudioSrcById(id) {
